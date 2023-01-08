@@ -6,10 +6,12 @@ from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 
+
 @app.route("/")
 def index():
     """初期画面を表示します."""
     return render_template("index.html")
+
 
 @app.route("/api/recommend_article")
 def api_recommend_article():
@@ -28,22 +30,39 @@ def api_recommend_article():
                 "link" : "記事のURL"
             }
     """
+    with urlopen("https://b.hatena.ne.jp/hotentry/all") as res:
+        html = res.read().decode("utf-8")
+    soup = BeautifulSoup(html, "html.parser")
+    items = soup.select("h3>a")
+    shuffle(items)
+    item = items[0].contents[0]
+    # contents[0]⇒タイトルだけ抽出
+    item2 = items[0].attrs['href']
+    # attrs['href']⇒URL抽出
+    print(item)
 
-    # ダミー
     return json.dumps({
-        "content" : "記事のタイトルだよー",
-        "link" : "記事のURLだよー"
+        "content": item,
+        "link": item2
     })
 
-@app.route("/api/xxxx")
-def api_xxxx():
-    """
-        **** ここを実装します（発展課題） ****
-        ・自分の好きなサイトをWebスクレイピングして情報をフロントに返却します
-        ・お天気APIなども良いかも
-        ・関数名は適宜変更してください
-    """
-    pass
+    # ダミー
+    # return json.dumps({
+    #     "content" : "記事のタイトルだよー",
+    #     "link" : "記事のURLだよー"
+    # })
+
+
+# @app.route("/api/xxxx")
+# def api_xxxx():
+#     """
+#         **** ここを実装します（発展課題） ****
+#         ・自分の好きなサイトをWebスクレイピングして情報をフロントに返却します
+#         ・お天気APIなども良いかも
+#         ・関数名は適宜変更してください
+#     """
+#     pass
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=5004)
